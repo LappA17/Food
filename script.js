@@ -1,116 +1,94 @@
-//ОДИН ИЗ САМЫХ ВАЖНЫХ УРОКОВ
-const btn = document.querySelector("button");
-/* для начала нужен эллемент на который будем вешать обработчик событий*/
+console.log(document.body);//так можем обратиться к любому тегу, методегу (хеду,бади)
+console.log(document.documentElement)// обращаемся к главному тегу HTML
+console.log(document.body.childNodes)//получаем псевдомассив где будут все дети Бади в консоли браузера
+ /* там будет все запутано, какие-то переносы, 4 тего выдало, потом динамические теги которые браузер
+ сам дополнил
+ 
+ Все что мы видим в тегах будет дом=элементами, а все что не видим дом=узлом(переносы строк, текстовые
+    элементы)
+    <li>1</li> - 1 будет дом узел
+    
+    благодаря childNodes мы получаем доступ ко всем все ноды, все узлы которые находястя внутри
+    родители*/
 
-btn.onclick = function() {
-    alert("click");
-}
-//в реальных проектах такой код почти НИКОГДА НЕ ИСПОЛЬЗУЕТСЯ
+    console.log(document.body.firstChild)
+    console.group(document.body.lastChild)
 
-btn.addEventListener("click", () => {
-alert("click");
-});
-/* здесь мы говорим что назначем Джаве Скрипту следить за этим эллементом если у нас произошло событие
-которые мы там назначим то он запустит
-CALLBACK функции это функции которые выполняются строго за другими. то-есть только после клика
-пользователя что то там произойдет*/
+    console.log(document.querySelector("#current")).parentNode;
+    //current - это просто айди тега батон с его хтмл
 
-btn.addEventListener("click", () => {
-    alert("Second click");
-    });
-    //второе действие
-btn.addEventListener("mouseenter", () => {
-console.log("Hover")  ;      
-});
-//mouseenter когда пользователь наводит мышкой происходит анимация
+    //если мы планируем использовать элемент один раз то можно не помещать его в переменную
+    /* у вани стоит три кнопки баттон и у них родитель див с классом ферст и ему нужно его получить
+    .parentNode - благодаря этой команде он может получить родителя и в консоле браузере он отобъется
+    
+    теперь ваня хочет получить родителя ферст а именно дис с классом враппер и для этого эту
+    комманду нужно продублировать два раза */
+    console.log(document.querySelector("#current")).parentNode.parentNode;
 
-btn.addEventListener("mouseenter", (event) => {
-    console.log(event)
-    });
-/* Событие Евент, передается как аргумент в коллбек функцию , можно вместо евент сокращенно (е)
-ОН ВСЕГДА ИДЕТ С ПЕРВЫМ АРГУМЕНТОМ
-На странице браузера будет благодаря Ивент описываться все что произошла с элементом на странице: это
-навод мыши , кординаты по х у, отступы и очень много чего. Но главное : type :это событие (например
-    маус ентер событие покажет), target : элемент на котором произошло событие
+    /* ДАТА-АТРИБУТЫ
+   <li data-current="3">3</li> после data-можно писать все что угодно
+   <li data-current="true" булиновое значение тоже можно задавать
 */
-btn.addEventListener("mouseenter", (e) => {
-    console.log(e.target);
-    e.target.remove();
-    });
-/* в консоли появится доступ к этому эллементу из html !!!
-и после этого благодря к примеру 
-Теперь наводим на элемент и он просто пропадает со страницы 
-Это очень и очень полезная возможность*/
+   console.log(document.querySelector("[data-current='3']").nextSibling)
+   /* допустим что нам нужно получить элемент после этого элемента с этим датой атрибута
+   для этого используем nextSibling
+   но самое интересное что html коде там стоит перенос строки и именно его мы получи :)
+   text# именно это выдаст консоль в браузере */
+   console.log(document.querySelector("[data-current='3']").previousSibling)
+   /* и мы опять получаем тектовоую ноту, мы можем спокойно попасть на текстовые узлы*/
+   console.log(document.querySelector("[data-current='3']").nextElementSibling)
+   previousElementSibling - тоже есть
+   /*и вот только сейчас в консоли я получу 4
+    */
+   console.log(document.querySelector("#current")).parentElement;
+   /* таким образом точно получу елемент*/
+   console.log(document.body.firstElementChild) // та же история, будет wrapper
 
-const deleteElement = (e) => {
-    console.log(e.target);
-    e.target.remove();
-    };
-btn.addEventListener('click', deleteElement);
-/* НЕЛЬЗЯ СОЗДАТЬ ДВЕ ОДИНАКОВЫХ ФУНКЦИИ И ДУМАТЬ ЧТО ОНИ БУДУТ РАВНЫ по этому нужно создавать новую даже
-если значение одинаковое 
-нельзя создать константу delete ! есть в жс зарезервированные именна
-МЫ ПРОСТО ПЕРЕДАЕ ДЕЛИТЖЛЕМЕНТ И ПЕРЕДАЕМ, МЫ ПРОСТО ГОВОРИМ ЧТО ПОСЛЕ ТОГО КАК У НАС ВЫПОЛНИТЬСЯ
-КЛИК ПО БТН, У НАС ВЫПОЛНИТЬСЯ ФУНКЦИЯ ДЕЛИТЭЛЕМЕНТ. ТО ЕСТЬ МЫ ЕЕ НЕ ВЫЗЫВАЕМ, А ПРОСТО НА НЕЕ ССЫЛАЕМСЯ
- */
-let i = 0;
-const deleteElement = (e) => {
-    console.log(e.target);
-    e.target.remove();
-    i++;
-    if (i == 1){
-        btn.removeEventListener('click', deleteElement);
-    }
-    };
-btn.addEventListener('click', deleteElement);
-/* ТАКИМ ОБРАЗОМ СОБЫТИЕ ПРОИЗОЙДЕТ ТОЛЬКО ОДИН РАЗ, КЛИЕНТ УСЛОВНО НАЖИМАЕТ НА КАКУЕ-ТО КНОПКУ
-НА САЙТЕ, ОНО НАЖИМАЕТСЯ ОДИН РАЗ НО ВТОРОЙ РАЗ НАЖАТЬ УЖЕ НЕ ПОЛУЧИТЬСЯ*/
+   for (let node of document.body.childNodes){
+       if(node.nodeName == "#text"){
+           continue;
+       }
+       console.log(node)
+   }
+   /* Иногда фор ич не работает и тут нужен фор оф
+   Я хочу перебрать все ноды в бади 
+   
+   Нам нужно вывести текущую ноду, но при этом избавиться от текстовых нот, для этого заходим в браузер
+   и заходим там в текст. У объекта есть свойства, в том числе nodeName которая равна #text
+   И как обычно использует цикл :)
+   И если я хочу что бы при наткнавение цикла на текстовую ноду цикл остановился используем continue
+   Continue останавливает цикл и просто продолжает его с новым элементом 
+   Break полностью прирывает цикл 
+   фор оф перебрал все элементы в бади и оставил нам только их, без узлов, а именно элементы*/
 
-const overlay = document.querySelector(".overlay");
-const deleteElement = (e) => {
-    console.log(e.target);
-    console.log(e.type);
-    overlay.addEventListener('click', deleteElement);
-
-/* Иван взял с хтмл оверлей - это обычный класс дива где находтся кнопки
-из-за того что может быть такая ситуация где в одном родители будет две кнопки которые
-могут обрабатывать одно и то же событие то мы задаем для родителя свойство
-    console.log(e.type); выводит в консоль событие которое произошло
-
-    У Ивана пояится небольшая обертка визуальная рамка на кнопке
-    Событие сначала произойдет на вложенном элементе а именно кнопке и потом пойдет выше по иерархии
-    на розовую рамку и в консоли появится два события - два клика по кнопке Бтн
-*/
-const overlay = document.querySelector(".overlay");
-const deleteElement = (e) => {
-    console.log(e.currentTarget);
-    console.log(e.type);
-    overlay.addEventListener('click', deleteElement);
-/* теперь же событие из-за карренттаргет. А теперь на бтн , а второй клик на Оверлеи, но на практике
-как правило только е.target используем
-ВСЫПЛЫТИЕ СОБЫТИЙ - ЭТО КОГДА ЭЛЕМЕНТ ОТРАБАТЫВАЕТ СНАЧАЛА НА ВЛОЖЕННОМ ЭЛЕМЕНТЕ , ПОТОМ НА РОДИТЕЛИ И
-ВЫШЕ И ВЫШЕ*/
-
-const link = document.querySelector("a");//у вани только одна ссылка в хтмл
-link.addEventListener("click", (event) => {
-event.preventDefault();
-console.log(event.target);
-}
-/* event.preventDefault() = этот метод говорит браузеру не перезодить по ссылке и он помещается в самое
-самое начало 
-И ТЕПЕРЬ ЕСЛИ МЫ КЛИКНЕМ ПО ССЫЛКЕ НА САЙТЕ ТО НАС НЕ ПЕРЕВОДЕТ ПО ССЫЛКЕ МЫ ПРОСТО ВЫВОДИМ ЭЛЕМЕНТ В
-КОНСОЛИ И МЫ БУДЕМ ОЧЕНЬ И ОЧЕНЬ ЧАСТО ЭТО ИСПОЛЬЗОВАТЬ - event.preventdefault для блокировки ссылки*/
-const deleteElement = (e) => {
-    console.log(e.currentTarget);
-    console.log(e.type);
-    overlay.addEventListener('click', deleteElement);
-
-const btns = document.querySelectorAll("button");
-btns.forEach(item => {
-    item.addEventListener("click", deleteElement, {once: true });
-});
-/* таким образом мы задаем событие для КАЖДОЙ кнопки в хтмл
-Что бы не использовать постоянно removeEventlistener можно задать опцию ONCE , и теперь нажатие
-будет только один раз
-, {once: true } делается это таким образом */
-
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        
+        <div class="wrapper">
+            <div class="first">
+                <button></button>
+                <button id="current"></button>
+                <button></button>
+            </div>
+            <div class="second">
+                <ul>
+                    <li>1</li>
+                    <li>2</li>
+                    <li data-current="3">3</li>
+    
+                    <li>4</li>
+                    <li>5</li>
+                </ul>
+            </div>
+            <div class="third"></div>
+        </div>
+        <!-- renernh -->
+        <script src="script.js"></script>
+    </body>
+    </html>
