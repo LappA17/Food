@@ -311,3 +311,66 @@ document.addEventListener("keydown",(e) => {
         closeModal();
     }
 });
+
+//сделаем так что бы модельно окно появлялось когда пользователь находится на сайте 15 секунд
+
+function openModal () {
+    modal.classList.add("show");
+    modal.classList.remove("hide");
+    document.body.style.overflow = "hidden"
+} //modelTrigger там уже не нужно это все, мы задали функцией как и с клоуз
+
+const modalTimerId = setTimeout (openModal, 15000);//внутрь прописываем функцию открытие модельного окна
+/* теперь модельное окно появляется после того времени что мы задали, но НАМ НУЖНО СДЕЛАТЬ ТАК ЧТО ЕСЛИ ПОЛЬЗОВАТЕЛЬ
+УЖЕ ОТКРЫВАЛ МОДЕЛЬНО ОКНО ТО ОНО ЕМУ УЖЕ НЕ ДОЛЖНО ВЫСКАКИВАТЬ*/
+
+function openModal () {
+    modal.classList.add("show");
+    modal.classList.remove("hide");
+    document.body.style.overflow = "hidden"
+    clearInterval(modalTimerId);//теперь благодаря этому не будет открывать мод окно если пользователь его уже вызывал
+
+    //теперь задача если ПОЛЬЗОВАТЕЛЬ ДОЛИСТАЛ ДО КОНЦА СТРАНИЦУ ТО ЕМУ ПОКАЗЫВАТЬ МОД ОКНО
+
+    window.addEventListener("scroll", () => {
+        if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            openModal();
+        }
+    })
+/*document.documentElement.clientHeight -видимая часть которуя мы прям сейчас видим на сайте, без какой-то там прокрутки
+
+pageYOffset - метод который отслеживаем окно, а именно оконные кординаты Y 
+
+в самом конце после scrollHeight Ваня сказал что они с учениками на некоторых браузерах обнаружили баг, что так скрипт не работает и он сказал что просто нужно в конце поставить минус 1 пиксель, то-есть СКРИПТ БУДЕТ РАБОТАТЬ ЗА 1ПИКСЕЛЬ ДО КОНЦА ПРОКРУТКИ СТРАНИЦЫ 
+if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight -1) {
+
+Ну и в конец помещаем команду openModal, пользователь долистал до конца и все у него появляется ф-ция открытия модельного окна
+
+Теперь у нас другая проблема, после того как пользователь постоянно долистывает до конца у него постоянно будет появляться модельное окно*/
+
+function showModelByScroll () {
+    if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+        openModal();
+        window.removeEventListener("scroll", showModelByScroll);
+    }
+}
+window.addEventListener("scroll", showModelByScroll);
+
+/* создадим ф-цию и в конце этой функции добавим window.removeEventListener("scroll", showModelByScroll
+
+ЧТО БЫ УДАЛИТЬ КАКОЙ-ТО ОБРАБОТЧИК СОБЫТИЙ МЫ ДОЛЖНЫ ДЕЛАТЬ ССЫЛКУ НА ФУНКЦИЮ КОТОРАЯ ИСПОЛНЯЛАСЬ 
+
+window.removeEventListener передаем четко что я назачал: какое событие и какую функцию. а именно "scroll", showModelByScroll
+*/
+
+
+ 
+
+
+
+
+
+
+
+
+};
