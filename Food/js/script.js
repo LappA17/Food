@@ -97,8 +97,7 @@ window.addEventListener('DOMContentLoaded', function() {
     // Modal
 
     const modalTrigger = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal'),
-        /*modalCloseBtn = document.querySelector('[data-close]'); - в 54 уроке мы ее удаляем */
+        modal = document.querySelector('.modal');
 
     modalTrigger.forEach(btn => {
         btn.addEventListener('click', openModal);
@@ -116,13 +115,11 @@ window.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'hidden';
         clearInterval(modalTimerId);
     }
-    
-    //modalCloseBtn.addEventListener('click', closeModal); эту тоже удаляем 
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal || e.target.getAttribute("data-close" == "") {
-            closeModal(); 
-        } // или е-таргет будет этим крестиком непосредственно , благодаря тому что мы можем получить этот атрбиту благодаря команде гетАтрибут и в него поместим data-close, и нам нужно поместить в него пустую строку потому что это крестик. И теперь даже в том модельном окне что мы только что создали крестик тоже будет работать
+        if (e.target === modal || e.target.getAttribute('data-close') == "") {
+            closeModal();
+        }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -131,7 +128,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 50000);
+    const modalTimerId = setTimeout(openModal, 300000);
     // Изменил значение, чтобы не отвлекало
 
     function showModalByScroll() {
@@ -216,7 +213,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     const forms = document.querySelectorAll('form');
     const message = {
-        loading: 'img/form/spinner.svg', // самое главное теперь правильно использовать это изображение и для этого мы смотрим где оно использовалось, в 232 div мы меняем на img 
+        loading: 'img/form/spinner.svg',
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...'
     };
@@ -229,15 +226,13 @@ window.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            let statusMessage = document.createElement("img")//('div'); был див стал img тег
-            statusMessage.src = message.loading//classList.add('status'); у нас класса статус вообще не  существовало по этому там где див был мы поменяли на тег img  и этому тегу img добавляем атрибут src вот так :) statusMessage.src = message.loading 
+            let statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
             statusMessage.style.cssText = `
-            display: block;
-            margin: 0 auto;
-            `//textContent = message.loading; это уже не надо а надо добавить новые стилистические данные, что бы изображение было по центру
-            /* теперь появится крутящиеся кружочек после того как пользователь оставляет заявку и ему показывается что она обрабатывается  */
-            //form.appendChild(statusMessage); это мы удаляем потому что спиннер крутится в перезвонить мне а не по центру экрана и добавляем команду ниже  
-            form.insertAdjacentElement("afterend", statusMessage) //  теперь спинер распологается под формой
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend', statusMessage);
         
             const request = new XMLHttpRequest();
             request.open('POST', 'server.php');
@@ -255,50 +250,38 @@ window.addEventListener('DOMContentLoaded', function() {
             request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
-                    /*statusMessage.textContent*/showThanksModal(message.success) = message.success;
-                    form.reset();
+                    showThanksModal(message.success);
                     statusMessage.remove();
-                    /*setTimeout(() => {
-                        statusMessage.remove();
-                    }, 2000); мы освобождаем от таймаута потому что у нас statusMessage будет использоваться только для loading. И теперь для statusMessage будет использоваться уже модельное окно
-                    По этому мы удаляем  statusMessage.textContent и там где он был мы начнем вызывать нашу новую созданную функию */
+                    form.reset();
                 } else {
-                    /*statusMessage.textContent*/ showThanksModal(message.failure); //то-есть теперь мы будем не statusMessage модифицировать а помещаем сообщение в данную функцию 
+                    showThanksModal(message.failure);
                 }
             });
         });
     }
 
-    // теперь будем создавать модельное окно как в т500 thanks , что тебя перебрасывает на мод окно с спасибо за покупку наш менедежр отзвонит, оно еще thanks называлось 
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector('.modal__dialog');
 
-    function showThanksModal(message){ // смс о статусе отправки будем передавать как аргумент message и добавим его в новосозданное модельное окно и на самом деле мы будем брать этот аргумент из объекта создного выше 
+        prevModalDialog.classList.add('hide');
+        openModal();
 
-        const prevModalDialog = document.querySelector(".modal__dialog"); // у нас на страничке уже есть модельное окно, когда мы до этого делали свяжитесь со мной, и нам нужно его сейчас получить что бы после того как пользователь оставлял заявку это модельное окно заменялось другим. Важно что мы модельное окно для пользователя старое не удаляем а просто скрываем
-
-        prevModalDialog.classList.add("hide"); // таким образом с помощью класса hide мы можем скрыть модельное окно
-        openModal(); //будет открывать новое модельное окно
-
-        const thanksModal = document.createElement("div");
-        thanksModal.classList.add("modal__dialog");// добавляем к новому окну тот же класс что бы мы один модел дайлег заменяли другим
-
+        const thanksModal = document.createElement('div');
+        thanksModal.classList.add('modal__dialog');
         thanksModal.innerHTML = `
-        <div class="modal__content">
-            <div class="modal__close" data-close>×</div>
-            <div class="modal__title">${message}</div>
-        </div>`;
-/*modal__close - это класс где находится крестик закрытия окна , я его скопировал прям с html .
-ОЧЕНЬ ВАЖНО а тот тут запутанно всё, этот крести там где дата клоуз был создан не автоматически благодаря html а динамически , вручную мной, я его вставил с верстки, по этому он функционально работать не будет, но тут мы вспоминаем что у нас есть функция закрытия модельного окна modalCloseBtn которую мы делали намного раньше (код в строке 101 и 120) 
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+        `;
+        document.querySelector('.modal').append(thanksModal);
+        setTimeout(() => {
+            thanksModal.remove();
+            prevModalDialog.classList.add('show');
+            prevModalDialog.classList.remove('hide');
+            closeModal();
+        }, 4000);
+    }
 
-теперь рас уж мы создали этот элемент внутри джаваскрипта нам нужно поместить его на страницу*/
-
-document.querySelector(".modal").append(thanksModal); //  теперь наш элемент появится на странице, но если все так оставить то форма просто удалится, нам нужно сделать так что бы клиент всегда мог видеть форму на сайте для повторной отправки
-
-setTimeout(() => {
-    thanksModal.remove();
-    prevModalDialog.classList.add("show");
-    prevModalDialog.classList.remove("hide");
-    closeModal();// из-за того что у пользователся начинается удалятся наша модалка и показываться предыдущий контент то мы просто должны закрыть модельное окно
-}, 4000);
-    
-}; // Я СКАЧАЛ spinner.svd / потом в папке img создал папку form и в нее поместил спинер свжи и теперь что бы использовать эту картинке и вместо loading в measse подставляем путь к этой картинке
-}); 
+    // API - ИНТЕРФЕЙС ПРОГРАМНОГО ОБЕСПЕЧЕНИЯ
+});
