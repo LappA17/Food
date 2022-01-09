@@ -216,7 +216,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
     const forms = document.querySelectorAll('form');
     const message = {
-        loading: 'Загрузка...',
+        loading: 'img/form/spinner.svg', // самое главное теперь правильно использовать это изображение и для этого мы смотрим где оно использовалось, в 232 div мы меняем на img 
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...'
     };
@@ -229,10 +229,15 @@ window.addEventListener('DOMContentLoaded', function() {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            let statusMessage = document.createElement('div');
-            statusMessage.classList.add('status');
-            statusMessage.textContent = message.loading;
-            form.appendChild(statusMessage);
+            let statusMessage = document.createElement("img")//('div'); был див стал img тег
+            statusMessage.src = message.loading//classList.add('status'); у нас класса статус вообще не  существовало по этому там где див был мы поменяли на тег img  и этому тегу img добавляем атрибут src вот так :) statusMessage.src = message.loading 
+            statusMessage.style.cssText = `
+            display: block;
+            margin: 0 auto;
+            `//textContent = message.loading; это уже не надо а надо добавить новые стилистические данные, что бы изображение было по центру
+            /* теперь появится крутящиеся кружочек после того как пользователь оставляет заявку и ему показывается что она обрабатывается  */
+            //form.appendChild(statusMessage); это мы удаляем потому что спиннер крутится в перезвонить мне а не по центру экрана и добавляем команду ниже  
+            form.insertAdjacentElement("afterend", statusMessage) //  теперь спинер распологается под формой
         
             const request = new XMLHttpRequest();
             request.open('POST', 'server.php');
@@ -295,5 +300,5 @@ setTimeout(() => {
     closeModal();// из-за того что у пользователся начинается удалятся наша модалка и показываться предыдущий контент то мы просто должны закрыть модельное окно
 }, 4000);
     
-};
-});
+}; // Я СКАЧАЛ spinner.svd / потом в папке img создал папку form и в нее поместил спинер свжи и теперь что бы использовать эту картинке и вместо loading в measse подставляем путь к этой картинке
+}); 
