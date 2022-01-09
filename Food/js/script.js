@@ -233,21 +233,49 @@ window.addEventListener('DOMContentLoaded', function() {
                 margin: 0 auto;
             `;
             form.insertAdjacentElement('afterend', statusMessage);
-        
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+
+           /* const request = new XMLHttpRequest();
+            request.open('POST', 'server.php'); этот участок кода нам больше не понадобиться , вместо него будет fetch */
+
+            /*fetch("server.php", {
+                method: "POST",
+                headers: {
+                    'Content-type': "application/json"
+                },
+                body: formData
+            }); ТЕПРЕЬ НЕОБХОДИМО ПЕРЕНЕСТИ НАШ fetch в другое место потому что мы его создавали на месте XMLHttpRequest /*
+
+            /*request.setRequestHeader('Content-type', 'application/json; charset=utf-8');  тоже не нужна */
             const formData = new FormData(form);
 
-            const object = {};
+           /* const object = {};
             formData.forEach(function(value, key){
                 object[key] = value;
             });
-            const json = JSON.stringify(object);
+            const json = JSON.stringify(object); */
 
-            request.send(json);
+            /*request.send(json) перенос fetch вместо него;*/
 
-            request.addEventListener('load', () => {
+            fetch("server.php", { //мы настраиваем куда
+                method: "POST", // каки образом
+                headers: { // и что именно 
+                    'Content-type': "application/json"
+                }, //если нужно будет данные в формате form data получить то headers нужно закомментировать
+                body: JSON.stringify(object)//если данные в formData то и в бади нужно вписать formData
+            }).then(data => data.text()) // что бы ответ приходил ввиде текста
+            .then(data => {
+                console.log(data);
+                    showThanksModal(message.success);
+                    statusMessage.remove();
+                    form.reset(); //это те опперации которые были в положительно исходе нашего запроса
+            }).catch(data => { //catch всегда желателно прописывать
+                showThanksModal(message.failure);
+            }).finally( () => { //очистка формы
+                form.reset();
+            });
+            // теперь нам необходимо обработать результат нашего запроса, раньше мы это делали как в функции request.addEventListener через if else и много всякой всячины
+
+            /*request.addEventListener('load', () => {
                 if (request.status === 200) {
                     console.log(request.response);
                     showThanksModal(message.success);
@@ -256,9 +284,9 @@ window.addEventListener('DOMContentLoaded', function() {
                 } else {
                     showThanksModal(message.failure);
                 }
-            });
+            }); */
         });
-    }
+    } 
 
     function showThanksModal(message) {
         const prevModalDialog = document.querySelector('.modal__dialog');
@@ -282,6 +310,28 @@ window.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }, 4000);
     }
+    // Fetch API - ИНТЕРФЕЙС ПРОГРАМНОГО ОБЕСПЕЧЕНИЯ
 
-    // API - ИНТЕРФЕЙС ПРОГРАМНОГО ОБЕСПЕЧЕНИЯ
+   /* fetch("https://jsonplaceholder.typicode.com/todos/1") // из этой конструкции нам возвращается именно promise , и если нам промис возвращается из условной функции то мы можем его обработать при помощи then 
+        .then(response => response.json())
+        .then(json => console.log(json));
+
+/* что бы испольщовать fetch , нам нужно раскрыть кргулые скобки и поместить тот юрл на который мы будем посылать запрос. Если не указывать больше никаких параметров то это будет обычный GET запрос который просто получит даннеы из этого url 
+
+userId: 1, id: 1, title: 'delectus aut autem', completed: false}  это появится в консоли браузера*/
+
+ /*fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    body: JSON.stringify({name: "Alex"}),
+    headers: {
+        "Content-type": "application/json"
+    }
+}) 
+        .then(response => response.json())
+        .then(json => console.log(json));
+        
+   /* {name: 'Alex', id: 101} это получил в консоли браузера
+   
+   ДАННУЮ ТЕХНОЛОГИЮ ПОЧТИ ВСЕ СТАЛИ ИСПОЛЬЗОВАТЬ ВМЕСТО XMLHttpRequest */ 
+
 });
