@@ -219,10 +219,31 @@ window.addEventListener('DOMContentLoaded', function() {
     };
 
     forms.forEach(item => {
-        postData(item);
+        bindPostData(item);
     });
 
-    function postData(form) {
+    const postData = async (url, data) => { /*отвечает за постинг данных когда мы отправляем их на сервер. Мы поместили url и data так как нам необхидмо дальше передавать url ссылку и данные которые будут поститься в этой функции */
+        const res = await fetch(url, {/* res - то-есть result  а во внутрь будет возвращать промис который идет от fetch */
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(object)
+        });
+        return await res.json();//будем возвращать в json формате. 
+    };
+    /* даже опытные программисты совершают здесь ошибку, а именно забывают что этот код который мы только что писали - асинхронный, это значит что что пока нам прийдет ответ от сервера в fetch может пройти какое-то время а переменная res ждать не будет и она не знает что такое json безе фетча, по-этому нам нужно сделать 
+    синхроный код
+    
+    мы ставим перед скобками const postData = (url, data) опператор async - тем самым говоря что у нас будет какой-то асинхроный код 
+    а дальше нам нужно использовать его парный опператор await. Эти опператоры всегда используются в паре
+    
+    Теперь javascript дождется результата await и только тогда вернет res в котором уже будет fetch в json
+    
+    return await res.json() теперь наш код дожидается конца работы res.json и только потом его уже возвращает*/
+
+    
+    function bindPostData(form) { // а эта будет отвечать за привязку постинга
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -236,18 +257,31 @@ window.addEventListener('DOMContentLoaded', function() {
         
             const formData = new FormData(form);
 
-            const object = {};
+            /* const object = {};
             formData.forEach(function(value, key){
                 object[key] = value;
-            });
+            });  ПРИОБРАЗИМ КОД, ЭТОТ УЖЕ НЕ НУЖЕН */
 
-            fetch('server.php', {
+            const json = JSON.stringify(Object.fromEntries(formData.entries()));
+            /* БЛАГОДРАЯ МЕТОДУ Object.fromEntries МЫ ОБРАЩАЕМСЯ К ГЛОБАЛЬНОМУ ОБЪЕКТУ И ДЕЛАЙ ВСЕ
+            НАОБОРОТ ОТ МЕТОДЕ  entries , а именно из массива делаем ОБЪЕКТ */
+
+            /*const obj = {a: 23, b: 50};
+            console.log(Object.entries(obj)) 
+            Ваня хочет сделать тоже самое с переменно json что : из обхекта сделать массив*/
+
+            /* fetch('server.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(object)
-            }).then(data => {
+            }) этот старый код уже не нужен*/
+            postData('http://localhost:3000/requests', json)/* JSON.stringify(object)) /* по аналогии с url и data которые мы указывали в
+            скобках в postData. теперь мы в ту функцию передали server.php и JSON.stringify(object) 
+            
+            Ваня сделал по элегентному и тепреь вместо JSON.stringify(object) мы получаем переменую json которые уже в себе содержит объект*/
+            .then(data => { 
                 console.log(data);
                 showThanksModal(message.success);
                 statusMessage.remove();
@@ -286,25 +320,36 @@ window.addEventListener('DOMContentLoaded', function() {
 // НИКОГДА НЕ ТРОГАТЬ ПАПКУ node_modules
 // Если мы скачиваем с гитхаба проект и понимаем что нам нужны node_modules мы просто npm i прописывам в терминале
 
-fetch("http://localhost:3000/posts")
-.then(data => data.json()) //я говорю что я возьму ответ от сервере то-есть data и преврощу его в обычный javascript объект
-.then(res => console.log(res));//и тот результат что получится выведем в консоль
+    fetch("http://localhost:3000/requests")
+        .then(data => data.json()) //я говорю что я возьму ответ от сервере то-есть data и преврощу его в обычный javascript объект
+        .then(res => console.log(res));//и тот результат что получится выведем в консоль
 /* в консоли получим объект 
 
 Ruslan@MacBook-Pro-EGO projectServer % npx json-server db.json
 
+  
   \{^_^}/ hi!
 
   Loading db.json
   Done
 
   Resources
-  http://localhost:3000/posts
-  http://localhost:3000/comments
-  http://localhost:3000/profile
+  http://localhost:3000/menu
+  http://localhost:3000/requests
 
   Home
   http://localhost:3000
 
-  Type s + enter at any time to create a snapshot of the database */
+  Type s + enter at any time to create a snapshot of the database
+Some error occurred Error: listen EADDRINUSE: address already in use 127.0.0.1:3000
+    at Server.setupListenHandle [as _listen2] (node:net:1334:16)
+    at listenInCluster (node:net:1382:12)
+    at GetAddrInfoReqWrap.doListen [as callback] (node:net:1520:7)
+    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:73:8) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '127.0.0.1',
+  port: 3000
+}*/
 });
