@@ -252,6 +252,20 @@ window.addEventListener('DOMContentLoaded', function() {
 
      }) 
 
+     axios.get("http://localhost:3000/menu")
+        .then(data => console.log(data));
+/* в консоли получим объект который нам вернет библиотека axios*/
+
+    axios.get("http://localhost:3000/menu")
+        .then(data => {
+            data.data.forEach(({img, altimg, title, descr, price }) => {
+                new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+        });
+        /* самое главное что нужно два раза к data обратиться , к тем данным что мы получили
+НУЖНО ВНИМАТЕЛЬНО ЧИТАТЬ ДОКУМЕНТАЦИЮ КАЖДОЙ БИБЛИОТЕКИ ЧТО МЫ БУДЕМ ИСПОЛЬЗОВАТЬ, В ДАННОЙ БИБЛИОТЕКЕ
+В data приходит именно тот ответ что прийдет от сервера, именно его мы и используем */
+
+
  /*   ТЕПЕРЬ ВЕСЬ КОД КОТОРЫЙ У НАС БЫЛ ДО ЭТОГО НАМ АБСОЛЮТНО НЕ НУЖЕН И МЫ ЕГО ПРОСТО УДАЛЯЕМ !
      new MenuCard(
         "img/tabs/vegy.jpg",
