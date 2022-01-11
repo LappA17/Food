@@ -1,5 +1,3 @@
-const { throws } = require("assert");
-
 window.addEventListener('DOMContentLoaded', function() {
 
     // Tabs
@@ -184,116 +182,36 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    const getResource = async (url) => { /* переиминовали функцию в getResource и data после юрл уже больше не будет потому что я ничего не отправляю на сервер а просто получаю и соотвественно объекта с настройками у меня тоже не будет. Я просто делаю запрос, ожидаю его окончания и трансформирую данные в нормальный джаваскриптовый объект который я смогу использовать */
-        const res = await fetch(url)
-
-        if(!res.ok){ // если рес не ок то мы выдадим ошибку в ручном режиме и тогда у нас сработает блок кода кетч
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);/* это объект ошибки, мы с ним работать будем редко но знать надо, а опператор throw - это
-            опператор который выкидывает данную ошибку !!!
-            
-            ${res.status} - это я обратился к нашему промису у которого есть статус  + мы так же получим url
-            по которому не смогли обратиться */
-        }
-         return await res.json(); 
-     };
-     /* тут появляется маленькая проблема которую нужно будет решить условием, дело в том что fetch когда получает проблему условную 403 или 400 и так далее не видит ее как проблему, для него это обычный статус. То
-     есть любая ошибка в http запросе то он нам не выдаст КЕТЧ, ТО ЕСТЬ НЕ ВЫДАСТ reject, для него ошибка это 
-     проблемы с интернетом. по этому пишем цыкл и знакомимся с двумя новыми свойсвтам у Promise : это ok и status
-     если ok то нет ошибки, а status это 404 нот фаунд или 403 и так далее, то есть тот статус который нам выдаст браузер */
-
-      //вызываем функцию getResource и говорю что я буду обращаться по определенному url
-      getResource("http://localhost:3000/menu");
-      .then(data => {/* и тут мы уже точно знаем что нам прийдет обычный объект с переменной res, то-есть вот они эти данные в виде data в трансформированном виде*/
-        data.forEach(({img, altimg, title, descr, price }) => {
-            new MenuCard(img, altimg, title, descr, price, ".menu .container").render(); /* вызываем конструктор. То-есть этот конструктор будет создавать у меня 
-            столько раз сколько у меня будет объектов внутри этого массиве и теперь нет смысла писать аж по 
-            3 карточки с одинаковым кодом и вот так вот образом его упростить и сделать код читабельным */
-        });
-      }); /* а дальше я вспоминаю что внутри у меня там где menu d db.json не объект а МАССИВ и у нас есть кучу свойств и методов как работать с массивом 
-
-      obj - это каждый отдельный элемент в массиве, потому у нас массив состоит из объектов 
-      так как каждый элемент в массиве это объект то во внутрь new MenuCard(obj.img, obj.alt и так далее) мы и передаем какие свойсвта 
-      мы должны передать на страницу 
-      
-      И что бы не писать new MenuCard(obj.img, obj.alt и так далее) и так далее что бы не получилось огромная строка мы используем 
-      свойсвто диструкторизации объекта и теперь вместо obj мы открываем фигрунеы скобки data.forEach(obj => {
-     и уже туда задаем нужные нам  свойства*
-     Теперь нам не нужно постоянно обращаться к obj потому что это повторение кода
-
-     ".menu .container" - это родитель куда мы будем весь этот код пушить
-      */
-
-     /*  Ваня покажет альтернативный вид написание кода без использование классов, который будет делать
-     верстку на лету  */
-
-     getResource("http://localhost:3000/menu")
-     .then(data => createCard(data) ); /* когда я получаю данные - мне необходимо запустить какуе-то функцию которая будет отвечать
-     за карточки на странице, сейчас это класс(огромный шаблон с this и там img , alt , descr и тд) 
-     
-     createCard(data) - это уже мы в самом конце когда функция готова здесь её вызываем */
-
-     function createCard(data) { /* мы создаем пока что только одну карточку, во внурь data - данные которые прийдут от сервера и это будет массим точно так же как и раньше  по этому foreach */
-        data.forEach( ({img, altimg, title, descr, price }) => { /* и так как у нас нет никакой шаблонизации мы прям здесь будем создавать элементы. Все это будет проихсодить внутри forEach а это значит что каждый раз на каждой итерации будут происходить одни и те же действия   */
-            const element = document.createElement("div");//создаем элемент
-            element.classList.add("menu__item");//добавляем класс
-            element.innerHTML = `
-            <img src=${img} alt=${altimg}>
-                <h3 class="menu__item-subtitle">${title}</h3>
-                <div class="menu__item-descr">${descr}</div>
-                <div class="menu__item-divider"></div>
-                <div class="menu__item-price">
-                    <div class="menu__item-cost">Цена:</div>
-                    <div class="menu__item-total"><span>${price}</span> грн/день</div>
-                </div>
-            `; //добавляем верстку которую мы писали выше в предыдущих уроках и УДАЛЯЕМ this
-            document.querySelector(".menu .container").append(element); //куда пушим и что пушим
-        });
-     } // ЭТОТ МЕТОД РАБОТАЕТ ИДЕАЛЬНО КОГДА НАМ НУЖНО ЧТО-ТО ПОСТРОИТЬ ОДИН РАЗ
-
-     }) 
-
-     axios.get("http://localhost:3000/menu")
-        .then(data => console.log(data));
-/* в консоли получим объект который нам вернет библиотека axios*/
-
-    axios.get("http://localhost:3000/menu")
+    getResource('http://localhost:3000/menu')
         .then(data => {
-            data.data.forEach(({img, altimg, title, descr, price }) => {
+            data.forEach(({img, altimg, title, descr, price}) => {
                 new MenuCard(img, altimg, title, descr, price, ".menu .container").render();
+            });
         });
-        /* самое главное что нужно два раза к data обратиться , к тем данным что мы получили
-НУЖНО ВНИМАТЕЛЬНО ЧИТАТЬ ДОКУМЕНТАЦИЮ КАЖДОЙ БИБЛИОТЕКИ ЧТО МЫ БУДЕМ ИСПОЛЬЗОВАТЬ, В ДАННОЙ БИБЛИОТЕКЕ
-В data приходит именно тот ответ что прийдет от сервера, именно его мы и используем */
 
+    // getResource('http://localhost:3000/menu')
+    //     .then(data => createCard(data));
 
- /*   ТЕПЕРЬ ВЕСЬ КОД КОТОРЫЙ У НАС БЫЛ ДО ЭТОГО НАМ АБСОЛЮТНО НЕ НУЖЕН И МЫ ЕГО ПРОСТО УДАЛЯЕМ !
-     new MenuCard(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        ".menu .container"
-    ).render();
+    // function createCard(data) {
+    //     data.forEach(({img, altimg, title, descr, price}) => {
+    //         const element = document.createElement('div');
 
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        14,
-        ".menu .container"
-    ).render();
+    //         element.classList.add("menu__item");
 
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        21,
-        ".menu .container"
-    ).render();
- */
+    //         element.innerHTML = `
+    //             <img src=${img} alt=${altimg}>
+    //             <h3 class="menu__item-subtitle">${title}</h3>
+    //             <div class="menu__item-descr">${descr}</div>
+    //             <div class="menu__item-divider"></div>
+    //             <div class="menu__item-price">
+    //                 <div class="menu__item-cost">Цена:</div>
+    //                 <div class="menu__item-total"><span>${price}</span> грн/день</div>
+    //             </div>
+    //         `;
+    //         document.querySelector(".menu .container").append(element);
+    //     });
+    // }
+
     // Forms
 
     const forms = document.querySelectorAll('form');
@@ -307,28 +225,29 @@ window.addEventListener('DOMContentLoaded', function() {
         bindPostData(item);
     });
 
-    /* const postData = async (url, data) => { /*отвечает за постинг данных когда мы отправляем их на сервер. Мы поместили url и data так как нам необхидмо дальше передавать url ссылку и данные которые будут поститься в этой функции */
-       /* const res = await fetch(url, {/* res - то-есть result  а во внутрь будет возвращать промис который идет от fetch */
-          /*  method: 'POST',
+    const postData = async (url, data) => {
+        let res = await fetch(url, {
+            method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(object)
+            body: data
         });
-        return await res.json();//будем возвращать в json формате. 
-    };  ЗАКОММЕНТИРУЕМ ЭТУ ФУНКЦИЮ И ПЕРЕНЕСЕМ К КАРТОЧКАМ потому что она нам больше не нужна*/
-    /* даже опытные программисты совершают здесь ошибку, а именно забывают что этот код который мы только что писали - асинхронный, это значит что что пока нам прийдет ответ от сервера в fetch может пройти какое-то время а переменная res ждать не будет и она не знает что такое json безе фетча, по-этому нам нужно сделать 
-    синхроный код
     
-    мы ставим перед скобками const postData = (url, data) опператор async - тем самым говоря что у нас будет какой-то асинхроный код 
-    а дальше нам нужно использовать его парный опператор await. Эти опператоры всегда используются в паре
-    
-    Теперь javascript дождется результата await и только тогда вернет res в котором уже будет fetch в json
-    
-    return await res.json() теперь наш код дожидается конца работы res.json и только потом его уже возвращает*/
+        return await res.json();
+    };
 
+    async function getResource(url) {
+        let res = await fetch(url);
     
-    function bindPostData(form) { // а эта будет отвечать за привязку постинга
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+    
+        return await res.json();
+    }
+
+    function bindPostData(form) {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -342,31 +261,10 @@ window.addEventListener('DOMContentLoaded', function() {
         
             const formData = new FormData(form);
 
-            /* const object = {};
-            formData.forEach(function(value, key){
-                object[key] = value;
-            });  ПРИОБРАЗИМ КОД, ЭТОТ УЖЕ НЕ НУЖЕН */
-
             const json = JSON.stringify(Object.fromEntries(formData.entries()));
-            /* БЛАГОДРАЯ МЕТОДУ Object.fromEntries МЫ ОБРАЩАЕМСЯ К ГЛОБАЛЬНОМУ ОБЪЕКТУ И ДЕЛАЙ ВСЕ
-            НАОБОРОТ ОТ МЕТОДЕ  entries , а именно из массива делаем ОБЪЕКТ */
 
-            /*const obj = {a: 23, b: 50};
-            console.log(Object.entries(obj)) 
-            Ваня хочет сделать тоже самое с переменно json что : из обхекта сделать массив*/
-
-            /* fetch('server.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(object)
-            }) этот старый код уже не нужен*/
-            postData('http://localhost:3000/requests', json)/* JSON.stringify(object)) /* по аналогии с url и data которые мы указывали в
-            скобках в postData. теперь мы в ту функцию передали server.php и JSON.stringify(object) 
-            
-            Ваня сделал по элегентному и тепреь вместо JSON.stringify(object) мы получаем переменую json которые уже в себе содержит объект*/
-            .then(data => { 
+            postData('http://localhost:3000/requests', json)
+            .then(data => {
                 console.log(data);
                 showThanksModal(message.success);
                 statusMessage.remove();
@@ -401,40 +299,62 @@ window.addEventListener('DOMContentLoaded', function() {
         }, 4000);
     }
 
-    // NPM - это кусочки кода которые лежат на серверах проектов которые мы можем устанавливать себе в проекты для использования
-// НИКОГДА НЕ ТРОГАТЬ ПАПКУ node_modules
-// Если мы скачиваем с гитхаба проект и понимаем что нам нужны node_modules мы просто npm i прописывам в терминале
+    // Slider
 
-    fetch("http://localhost:3000/requests")
-        .then(data => data.json()) //я говорю что я возьму ответ от сервере то-есть data и преврощу его в обычный javascript объект
-        .then(res => console.log(res));//и тот результат что получится выведем в консоль
-/* в консоли получим объект 
+    const slides = document.querySelectorAll(".offer__slide"), //количество слайдов которое у меня есть на страничке
+          prev =  document.querySelector(".offer__slider-prev"), //стрелочка для переключателя слайла влево
+          next = document.querySelector(".offer__slider-next"), // вправо
+          total = document.querySelector("#total"), // цыфра который показывает номер слайда условно 3 или 4
+          current = document.querySelector("#current"); // поточная цыфра
 
-Ruslan@MacBook-Pro-EGO projectServer % npx json-server db.json
+    let slideIndex = 1; // index  который будет давать точно положение слайдера на сайте условно 1 фото или сейчас он на 3 фото
 
-  
-  \{^_^}/ hi!
+    showSlides(slideIndex); /* теперь нам сюда приходит 1чка в функцию showSlides, дальше мы скрываем все слайда и 
+    показываем только первый слайд */
 
-  Loading db.json
-  Done
+    function showSlides(n){ //функция по показу и скрытию наших слайдов/ n -это slideIndex который будет туда приходить
 
-  Resources
-  http://localhost:3000/menu
-  http://localhost:3000/requests
+    if(slides.length < 10) { /* если слайдом меньше 10 то мы возвращаем количество слайдов(причем добавляем к нем еще 0)
+        и подставляем в элемент там где цифры отображются какой слайд по счету */
+        total.textContent = `0${slides.length}`;
+    } else {
+        total.textContent = slides.length; /* НАКОНЕЦ-ТО ПОНЯЛ, ЕСЛИ СЛАЙДОВ МЕНЬШЕ 10 ТО К НИМ В НАЧАЛЕ БУДЕТ 
+        ДОПИСЫВАТЬСЯ 0, ЕСДИ БОЛЬШЕ 10 ТО ПО НОРМАЛЬНОМУ*/
+    } /*мы не можем поместить весь этот функциал во внутрь функции showSlides потому что она реагирует после нажатия на 
+    стрелочку, а общее количество фото должно показываться на сайте внезавивисмости от того какой сейчас слайдер открыт
+    и теперь мы как раз помещаем актуальный номер слайдера на сайте в функию showSlides */
+    
+        if (n > slides.length) { // если n больше количество слайдов которые вообще есть в верстке
+            slideIndex = 1; //если мы вправо дошли до максимума то возвращает наш индекс на 1 слайд
+        } if (n < 1) {
+            slideIndex = slides.length; // если индекс на 1 слайдере то при клике в лево нам перекидывает на последний слайдер
+        }
 
-  Home
-  http://localhost:3000
+        slides.forEach(item => item.style.display = "none");// теперь нужно скрыть все слайдеры на старнчке и показать только тот который нас действително интересует.
+        // все, все слайдеры скрытые
 
-  Type s + enter at any time to create a snapshot of the database
-Some error occurred Error: listen EADDRINUSE: address already in use 127.0.0.1:3000
-    at Server.setupListenHandle [as _listen2] (node:net:1334:16)
-    at listenInCluster (node:net:1382:12)
-    at GetAddrInfoReqWrap.doListen [as callback] (node:net:1520:7)
-    at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:73:8) {
-  code: 'EADDRINUSE',
-  errno: -48,
-  syscall: 'listen',
-  address: '127.0.0.1',
-  port: 3000
-}*/
-});
+        slides[slideIndex - 1].style.display = "block";
+        //теперь мы установили слайд который нам нужен, обрати внимание что стоит [slideIndex - 1] так как это массив +
+        // помни что для обычного пользователя не может показываться 0
+
+        if(slides.length < 10) {
+            current.textContent = `0${slideIndex}`; // тут не slide.length , а slideIndex - наш текущий слайд 
+        } else {
+            current.textContent = slideIndex;
+        } 
+    }
+        function plusSlides(n) { // эта функция будет вызывать мою функцию showSlides 
+            showSlides(slideIndex += n);/* слайдиндекс будет увеличен на значение n и обарти внимание что если туда
+             приходит 1 то мы просто прибовляем 1, а если прийдет -1 то прибавится до -2 */
+        }
+
+        prev.addEventListener("click", () =>{
+            plusSlides(-1); // когда мы нажимаем на prev мы сюда передаем -1
+        });
+
+        next.addEventListener("click", () =>{
+            plusSlides(1); // когда мы нажимаем на prev мы сюда передаем -1
+        }); 
+
+ });
+        
