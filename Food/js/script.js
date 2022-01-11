@@ -189,29 +189,6 @@ window.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-    // getResource('http://localhost:3000/menu')
-    //     .then(data => createCard(data));
-
-    // function createCard(data) {
-    //     data.forEach(({img, altimg, title, descr, price}) => {
-    //         const element = document.createElement('div');
-
-    //         element.classList.add("menu__item");
-
-    //         element.innerHTML = `
-    //             <img src=${img} alt=${altimg}>
-    //             <h3 class="menu__item-subtitle">${title}</h3>
-    //             <div class="menu__item-descr">${descr}</div>
-    //             <div class="menu__item-divider"></div>
-    //             <div class="menu__item-price">
-    //                 <div class="menu__item-cost">Цена:</div>
-    //                 <div class="menu__item-total"><span>${price}</span> грн/день</div>
-    //             </div>
-    //         `;
-    //         document.querySelector(".menu .container").append(element);
-    //     });
-    // }
-
     // Forms
 
     const forms = document.querySelectorAll('form');
@@ -301,136 +278,137 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // Slider
 
-    /* ВСЕ СЛАЙДЫ В ХТМЛ ОБОРАЧИВАЕМ ЕЩЕ В ОДНУ ОБЕРКТУ c дивом
-    offer__slider-inner
-    делается это для того что бы главная обертко у нас была как окошка через который мы можем видеть
-    текущий слайд*/
+    let offset = 0;
+    let slideIndex = 1;
 
-    const slides = document.querySelectorAll(".offer__slide"), //количество слайдов которое у меня есть на страничке
-          prev =  document.querySelector(".offer__slider-prev"), //стрелочка для переключателя слайла влево
-          next = document.querySelector(".offer__slider-next"), // вправо
-          total = document.querySelector("#total"), // цыфра который показывает номер слайда условно 3 или 4
-          current = document.querySelector("#current"), // поточная цыфра
-          slidedsWrapper = document.querySelector(".offer__slider-wrapper"), /* wrapper нам нужен
-          что бы при перекрутки слайдов мы не переключали его а передвигали по отношению к wrapper
-          происходит это благодрая трансформ который мы будем принимать к иннеру*/
-          slidesField = document.querySelector(".offer__slider-inner"), //поле с нашими слайдами, тот иннер что мы только что создали
-          width = window.getComputedStyle(slidedsWrapper).width;
-          /* нам нужно знать ширину блока который отвечает за слайдер, то-есть .offer__slider-wrapper
-          то окошко через которое мы будем видеть наш слайдер. ПО ЭТОМУ нам изначально нужно получить ширину
-          которая была предпринята по отношениж к этому блоку
-          width = window.getComputedStyle(slidedsWrapper) - это в консоли есть такая фигня где ваня в прошлых уроках рассказывал
-          как черещ computed можно смотреть в окне. А во внтурь помещаем мы тот элемент который нас 
-          интересует
-          
-          window.getComputedStyle(slidedsWrapper) = тут вернется объект а благодаря width - я из него
-          вытащу только ширину*/
+    const slides = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        total = document.querySelector('#total'),
+        current = document.querySelector('#current'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        width = window.getComputedStyle(slidesWrapper).width,
+        slidesField = document.querySelector('.offer__slider-inner'),
+        slider = document.querySelector(".offer__slider"); /*нам нужно будет к нему обратиться что
+        бы установить position relative */
 
-    let slideIndex = 1; 
-    let offset = 0; //создаем перемуную что бы понимать на сколько мы уступили влево,вправо при помощи трансформа
-
-    if(sliides.length < 10){
+    if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
-        current.textContent = `0${slideIndex}`;
+        current.textContent =  `0${slideIndex}`;
     } else {
         total.textContent = slides.length;
-        current.textContent = slideIndex;
+        current.textContent =  slideIndex;
     }
-
-    slidesField.style.width = 100 * slides.length + "%"; /* все что необходимо это умножить количество слайдов на сто процентов
     
-    % добавялем потому что мы записываем в css стили и передаем в виде строки потому что на там необходима 
-    единица измерения
-    
-    ВСЮ ЭТУ ОППЕРАЦИЮ МЫ ДЕЛАЛИ ДЛЯ ТОГО ЧТО БЫ ВЗЯТЬ ВСЕ СЛАЙДЫ ЧТО ЕСТЬ НА СТРАНИЦЕ 
-    И ПОМЕСТИТЬ В slides.Field и что бы они помещались полностью*/
+    slidesField.style.width = 100 * slides.length + '%';
+    slidesField.style.display = 'flex';
+    slidesField.style.transition = '0.5s all';
 
-    /*все дивы в которых находятся img со слайдерами могут быть разной ширины или высоты и не фиксированы */
-    
-    slidesField.style.display = "flex";/*у нас все слайдеры расположились сверху вниз а не в слайдере
-    по этому мы обращаемся к флексам что бы разместить их по центру */
-    slidesField.style.transition = "0.5s all"; /*теперь у нас верстка пошла по цента от того места
-    где она была изначально аж далеко-далеко за межи страницы . ЧТО БЫ ЭТО ПОФИКСИТЬ НУЖНО ВЗЯТЬ
-    НА wrapper и ограничить показ в нем элементов*/
-    slidesWrapper.style.overflow = "hidden"; //теперь элементы которые скрыты от области видимости не попадают в наш wrapper
-
-    /* теперь у нас есть иннер , в одну полоск расположены слайды и теперь что бы передвигать стрелочками
-    наш слайдер мы будет трансформировать его сдвигом либо в лево либо в право что бы показывать нужный слайдер*/
-
+    slidesWrapper.style.overflow = 'hidden';
 
     slides.forEach(slide => {
-        slide.style.width = width; /*теперь мы точно уверены что все слайды одиноковой ширины и что все они 
-        поместяться в slideField */
+        slide.style.width = width;
     });
-    
-    next.addEventListener("click", () => {
 
-        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))){ /*мы говорим что если наш ОТСТУП будет равен ширине одного слайда умноженого на количество слайдов - 1 то offset = 0 , а это значит что мы долистали до самого конца и нам необходимо вернуться к самому началу 
-            (slides.length - 1) обернули в скобки для вышего приоритета
+    slider.style.position = "relative"; /* теперь все элементы что будут абсолютно спозиционированы внутри 
+    слайдера будут нормально отображаться*/
 
-        а в переменной ширины у нас дословно лежит вот такое значение = "500px", то-есть строка, а если
-        мы строку будем умножать на число то мы получим ошибку
-        По-этому мы к width добавляем + что бы получить числовый тип данных
-        и вспоминаем за метод slice который вырезает определенный участок строки и делать мы это будем начиная
-        с 0го символа и так же нам необходимо исключить два последних сивола - для этого обращаемся к переменной
-        берем ее длину и отнимаем два последних символа  */
+    /*следующая наша задача создать большую обертку для всех точек */
+    const indicators = document.createElement("ol");
+
+        dots = []; // создаем массив дотс что бы можно было ее запушить
+
+    indicators.classList.add("carousel-indicators");
+    indicators.style.cssText = `
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 15;
+        display: flex;
+        justify-content: center;
+        margin-right: 15%;
+        margin-left: 15%;
+        list-style: none;
+    `; //всё, стили будут применины к этому блоку. 
+
+    //Теперь нужно поместить нашу обертку прям во внутрь слайдера
+
+    slider.append(indicators);
+
+    // Пока что наш блок ничего не содержит это просто ordered list (ol) в который мы должны что-то поместить
+    //Для этого мы должны основываясь на кстве слайдов создать нужное кство точек
+
+    for (let i = 0; i < slides.length; i++) {//наш цикл закончится только когда закончится кство слайдов
+        const dot = document.createElement("li"); //создаем точки
+        dot.setAttribute("data-slide-to", i + 1); //нужно установить атрибут который будет четко говорить 1 точка идет к 1 слайду
+/*("data-slide-to", i + 1) - дословно это значит что я каждой точки устанавливать буду атрибут data-slide-to,
+то-есть к какому слайду она будет относится 
+    i + 1 - и буду устанавливать нумерацию с 1, потому что 1 слайд - 1 точка*/
+    dot.style.cssText = `
+    box-sizing: content-box;
+    flex: 0 1 auto;
+    width: 30px;
+    height: 6px;
+    margin-right: 3px;
+    margin-left: 3px;
+    cursor: pointer;
+    background-color: #fff;
+    background-clip: padding-box;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    opacity: .5;
+    transition: opacity .6s ease;
+    `;
+
+        if(i == 0){
+            dot.style.opacity = 1;
+        } /* слайдер начинается чаще всего с 0 индекса, то 1 точка будет активна, он просто визуально будет
+        более ярким */
+
+    indicators.append(dot); // эту точку мы запендили в индикаторс
+    dots.push(dot); /* создав массив, мы получили метод пуш, то-есть мы создали массив дотсы и когда
+    мы заапендили точку на страничку мы ее и запушили и теперь у нас получился массив который мы сможем
+    использовать */
+    }
+
+    next.addEventListener('click', () => {
+        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) {
             offset = 0;
-        } else { /* если у нас это не последний слайд то мы будем использовать смищение
-            мы используем коротки опператор добавления +=
-            ДОСЛОВНО ЭТО ЗНАЧИТ что как только мы нажимаем стрелочку перемотки слайдера к нам добавляет 
-            сразу новый слева который к нам смещается*/
-            offset += +width.slice(0, width.length - 2);
+        } else {
+            offset += +width.slice(0, width.length - 2); 
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
 
-        if (slideIndex == slides.length) { /*если мой слайдиндекс будет равен количеству слайдов что вообще у меня
-            есть на странице то я дошел до конца слайдер  */
-
-            slideIndex = 1; // то мне необходимо вернуться на первую позицию
+        if (slideIndex == slides.length) {
+            slideIndex = 1;
         } else {
             slideIndex++;
         }
 
-        if(slides.length < 10) {
-            current.textContent = `0${slideIndex}`;
+        if (slides.length < 10) {
+            current.textContent =  `0${slideIndex}`;
         } else {
-            current.textContent = slideIndex;
+            current.textContent =  slideIndex;
         }
+
+        dots.forEach(dot => dot.style.opacity = ".5");/*опасити 50 процентом это значит что пока одна 
+        будет яркая остальные будут яркие на половину, то-есть все точки будут равны 50 процентов */
+        dots[slideIndex - 1].style.opacity = 1;
     });
-    /* когда я нажимаю на кнопочку вперед мне нужно двигать слайд
-    для этого я обращаюсь к slidesField*
-    
-    translateX - это двигать слайдер по оси x и тут нам нужно четко сказать на сколько и куда мы будем смещать
-    данный элемент. В css влево = минус , вправо = плюс 
-    ${offset} = благодаря этому мы будем понимать на сколько мы хотим сдвинуться влево или вправо
-    
-    нам нужно при нажатие next придусмотреть конечный вариант передвижение , для этого прописываем 
-    условие if */
 
-    prev.addEventListener("click", () => { /*теперь для prev нужно все поменять местами по анлогии и что
-        бы когда я нажимал на последнем слайде назад меня возвращало не первый слайд
-        
-        Здесь мы в условие должны проверять другое значение, ен последний сайт, а первый. А последний 
-        слайд у нас будет когда offset будет равен 0
-        
-        Обрати внимание что здесь мы offset == 0 не примсваевыаем а именно сравниваем 
-
-        offset = +wid... а здесь мы присваеваем наш последний слайд который вычесляется по той формуле
-        что мы записали. 
-
-        И по аналогии не добавялем а отнимаем - в ELSE
-        */
+    prev.addEventListener('click', () => {
         if (offset == 0) {
             offset = +width.slice(0, width.length - 2) * (slides.length - 1);
         } else {
             offset -= +width.slice(0, width.length - 2);
         }
-    
+
         slidesField.style.transform = `translateX(-${offset}px)`;
 
-        if (slideIndex == 1) { // когда мы находимя на первом слайде при клике на кнопку придыдущего будет...
-            slideIndex = slides.length; //при клики на предыд слайд мы будем смещатся в самый конец
+        if (slideIndex == 1) {
+            slideIndex = slides.length;
         } else {
             slideIndex--;
         }
@@ -440,11 +418,35 @@ window.addEventListener('DOMContentLoaded', function() {
         } else {
             current.textContent =  slideIndex;
         }
+
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[slideIndex - 1].style.opacity = 1;
     });
+    /* осталось добавить к ним функциональности, то-есть когда я буду кликать на эту точку меня
+        перебрасывало на определенный слайд. И что бы это сделать нужно что бы и вверу номер менялся
+        и слайдер. и все дивы друг за другом перестраивались*/
 
-    
+        dots.forEach(dot => {
+            dot.addEventListener("click", (e) =>{
+                const slideTo = e.target.getAttribute("data-slide-to");
+                /* мы будем использовать обработичк событий e потому что у каждой из точек есть атрибут
+        дейта слайд ту который мы и должны получить потому что мы на него ориентируемся */
 
-    
+                slideIndex = slideTo; /* кликнули на 4 точку, у нас тут стоит 4ка и соотвественно слайд
+                индекс пойдет на 4ку */
+                offset = +width.slice(0, width.length - 2) * (slideTo- 1); /* обрати внимание что 
+                вместо slides.length мы поместили slideTo */
+                slidesField.style.transform = `translateX(-${offset}px)`;
 
- });
-        
+                if (slides.length < 10) {
+                    current.textContent =  `0${slideIndex}`;
+                } else {
+                    current.textContent =  slideIndex;
+                }
+
+                dots.forEach(dot => dot.style.opacity = ".5");
+                dots[slideIndex - 1].style.opacity = 1;
+            });
+        }); 
+
+});
