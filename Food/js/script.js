@@ -427,138 +427,131 @@ window.addEventListener('DOMContentLoaded', function() {
         return +str.replace(/\D/g, '');
     }
 
-    // CALCULATOR
-    /* в html добавляем уникальные индфикаторы мужчине и женщине, а именно id male female
-    
-        Дальше к каждому нужному элементу добавляем data-атрибут
-        data-ratio="1.2" Мы каждой активности добавили свой коеифициент с рандомного диетологического сайта
-        */
+    // Calculator
 
-    const result = document.querySelector(".calculating__result span");
-    /* Я буду получать главный элемент куда я буду все это дело запиывать
-    .calculating__result span - это там где число с вашей суточной нормой каллорий  */
+    const result = document.querySelector('.calculating__result span');
 
-    let sex = "female", height, weight, age, ratio = "1.375"; /* Мы задали значеие женщине и активности
-    потому что на сайте они подефолту горят зеленым и даже если я сразу не укажу пол и активность то
-    они будут стоять по дефолту */
-    /* пол, рост, вес, возраст, коеф активности = то что будет меняться  */
+    let sex, height, weight, age, ratio;
 
-    function calcTotal () {
-        if(!sex || !height|| !weight|| !age|| !ratio) {
-            result.textContent = "____";
+     /* Теперь мы должны сказать что если у нас в local storage есть какая-то информация то мы эту 
+        информацию берем и помещаем в переменную sex и ratio , а если инфы нет то по умолчанию */
+
+    if(localStorage.getItem("sex")){ /* sex вписываем для проверки этого значения(есть оно или нет) */
+        sex = localStorage.getItem("sex");
+     /* мы убрали глобальное значение переменной sex, ratio потому что мы его сейчас зададим в ELSE */
+    } else {
+        sex = "female";
+        localStorage.setItem("sex", "female"); /*устанавливаем пол как женский */
+    }
+
+    if(localStorage.getItem("ratio")){ 
+        ratio = localStorage.getItem("ratio");
+    } else {
+        ratio = "1.375";
+        localStorage.setItem("ratio", 1.375);
+    }
+
+    function initLocalSettings (selector, activeClass) { /* эта функция будет принимать в себя какой-то селектор
+        и класс активность */
+        const elements = document.querySelectorAll(selector);
+    /* Эту функцию мы сначала будем использовать на блоках активности потом на сексе, или наоборот(неважно)
+    я просто возьму эти дивы и буду их дальше перебирать. Когда я захожу на страницу мне необъодимо как 
+    обычно убрать классы активностей со всех кнопок, что бы они сначало были чистами, а после этого назначить
+    класс активностей именно тому элементу который соотвествует значению из local storage.
+    То-есть когда мы зашли на страничку, все кнопочки очистились, и во время перебора я должен проверять 
+    data-ratio. Когда моя кнопка совпадет по значение data-ratio которая записанная с local storage,
+    то в таком случае на эту кнопку я буду навешивать класс активности.
+    В активности мы ориентируемся на data атрибут, а в сексе на id*/
+
+    elements.forEach(elem => {
+        elem.classList.remove(activeClass);
+        if(elem.getAttribute("id") === localStorage.getItem("sex")) {
+            elem.classList.add(activeClass);
+        }
+        if(elem.getAttribute("data-ratio") === localStorage.getItem("ratio")) {
+            elem.classList.add(activeClass);
+        }
+    });
+}
+    initLocalSettings('#gender div', 'calculating__choose-item_active');
+    /* Руслан, не тупи, функция не знает что такое selector и activeClass. По-этому мы их должны
+    передать при вызове функции */
+    initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
+       
+
+    function calcTotal() {
+        if (!sex || !height || !weight || !age || !ratio) {
+            result.textContent = '____'; // Можете придумать что угодно
             return;
-        }/* эту функцию мы будем запускать каждый раз когда будет какое-то изменение, если пользователь ввел 
-    какое-то другой элемент или вел что то в инпуте, что бы мы могли нормально пересчитать значение
-    СРАЗУ нужно сделать так что бы эта функия работала только тогда когда пользователь ввел абсолютно все 
-    данные ВАШ ПОЛ, ВАША КОНСТИТУЦИЯ , ФИЗ АКТИВНОСТЬ.
-    Что бы это сделать нужно что бы если хотя бы что-то одно из let sex, height, weight, age, ratio будет 
-    false то функци не работает */
-        if (sex === "female") {
+        }
+        if (sex === 'female') {
             result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
-            /* формула с левого сайта того с диетой  */
         } else {
             result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
         }
-        /* Math.round - округляет до ближйшего значения что бы не было условно 2100.41459595959, a 2100 */
-    } 
-    calcTotal ();
+    }
 
-    function getStaticInformation (parentSelector, activeClass) {/* теперь нужно оживить наши div где ведите 
-        ваш вес, рост и тд, потому что пока что это просто блоки в которые нельзя ничего ввести */
- /* parentSelector - мы будем применять нашу функцию getStaticInformation на нескольких элементах по этому 
- мы поместили parentSelector 
- И кроме этого мы будем менять класс активности activeClass, наша функция должна знать какой класс переключать
- по-этому мы помещаем в нее  */
+    calcTotal();
 
-        const elements = document.querySelectorAll(`${parentSelector} div`);
-        /* Я говорю что внутри этого родителя я буду получать все div */
+    /*function getStaticInformation(parentSelector, activeClass) {
+         const elements = document.querySelectorAll(`${parentSelector} div`); */
+      function getStaticInformation(selector, activeClass) {
+         const elements = document.querySelectorAll(selector);
+         /* Модифицыруем функию 
+          Здесь мы использовали parentSelector , который нам помогал при делигирование событий, но сейчас 
+          она нам не нужен, сейчас мы просто берем какие-то элементы и с ними работаем
+          НО ТЕПЕРЬ НАМ НУЖНО ПЕРЕДАТЬ div в 
+          getStaticInformation('#gender div', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
+    ВЕДЬ Я ОБРАЩАЮС К БЛОКУ КОТОРЫЕ НАХОДЯТСЯ ВНУТРИ СЕЛЕКТОРА gender И calculating__choose_big
+    и в initLocalSettings тоже по аналогии*/
 
-        /* В конце урока Ваня захотел поправить баг что когда мы кликаем чуть мимо дивов 
-        с таблицами(рост, вес, пол, активноть и так далее, то-есть все) то у него ломается верстка
-        Такое происходит потому что мы используем делегирование событий
-        Нужно использовать просто навешивание событий
-        И вместо того что бы вешать на родителя обработчик событий document.querySelector(parentSelector)
-        мы вешаем обработчик событий на каждый элемент*/
         elements.forEach(elem => {
-            elem.addEventListener("click", (e) => {
-                if(e.target.getAttribute("data-ratio")){
-                    ratio = +e.target.getAttribute("data-ratio");
-            /*Дословно это значит что если пользователь кликнул на умеренная активнось, то мы просто берем 
-            и вытаскиваем эту активность которая у него стоит внутри этого атрибута, а если низкая активность, 
-            то у нас просто переключится значение, но если кликнет в пол то такое не сработает потому что
-            там нет такого атрибута */
+            elem.addEventListener('click', (e) => {
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio');
+                    localStorage.setItem("ratio", +e.target.getAttribute('data-ratio'));
+                    /* теперь нам нужно реализовать фнукционал когда пользователь кликает на свой пол
+                    и активность, что бы браузер с помощью localStorage запоминал это 
+                    
+                    +e.target.getAttribute('data-ratio') - это значение  ratio*/
                 } else {
-                    sex = e.target.getAttribute("id");
+                    sex = e.target.getAttribute('id');
+                    localStorage.setItem("sex", e.target.getAttribute('id'));
+                    /* теперь в application в local storage  при клике на пол или активность у меня
+                    меняетс key и value */
                 }
-                /* если мы работаем с "выберите ваш пол", то мы работает с уникальными id которые мы туда
-            поместили. А если работаем с "ФИЗ АКТИВНОСТЬ" то мы обращаемся к атрибуту data-ratio.
-            ПО-ЭТОМУ мы пишем условие где говорим что если пользователь кликнул на элемент где есть
-            атрибут data-ratio то мы работаем с ним, а если этого атрибута нет то будет работать
-            "ваш пол" по айди */
     
-                //console.log(ratio, sex); // просто посмотреть на значение переменной
-    
-                /* Теперь необходимо поработать с классами активностей */
-                elements.forEach(elem => { /*говорич что каждый элемент внутри будет избавляться 
-                    от своего аткивного класса */
+                elements.forEach(elem => {
                     elem.classList.remove(activeClass);
                 });
-                e.target.classList.add(activeClass) /* Тому Диву на который кликнет пользователь назначается
-                класс Активности ! */
+    
+                e.target.classList.add(activeClass);
     
                 calcTotal();
             });
         });
     }
-        /* Это устаревший код, я его вырезал и поместил в elements.forEach(elem => {
-            elem  вместо document.querySelector(parentSelector) */
 
-        /*теперь мы должны отслеживать клики внутри родительского элемента parentSelector  */
-       /* document.querySelector(parentSelector).addEventListener("click", (e) => {
-            if(e.target.getAttribute("data-ratio")){
-                ratio = +e.target.getAttribute("data-ratio");
-        /*Дословно это значит что если пользователь кликнул на умеренная активнось, то мы просто берем 
-        и вытаскиваем эту активность которая у него стоит внутри этого атрибута, а если низкая активность, 
-        то у нас просто переключится значение, но если кликнет в пол то такое не сработает потому что
-        там нет такого атрибута */
-           /* } else {
-                sex = e.target.getAttribute("id");
-            }
-            /* если мы работаем с "выберите ваш пол", то мы работает с уникальными id которые мы туда
-        поместили. А если работаем с "ФИЗ АКТИВНОСТЬ" то мы обращаемся к атрибуту data-ratio.
-        ПО-ЭТОМУ мы пишем условие где говорим что если пользователь кликнул на элемент где есть
-        атрибут data-ratio то мы работаем с ним, а если этого атрибута нет то будет работать
-        "ваш пол" по айди */
+    getStaticInformation('#gender div', 'calculating__choose-item_active');
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
 
-            //console.log(ratio, sex); // просто посмотреть на значение переменной
-
-            /* Теперь необходимо поработать с классами активностей */
-            /*elements.forEach(elem => { /*говорич что каждый элемент внутри будет избавляться 
-                от своего аткивного класса */
-           /*     elem.classList.remove(activeClass);
-            });
-            e.target.classList.add(activeClass) /* Тому Диву на который кликнет пользователь назначается
-            класс Активности ! */
-
-          /*  calcTotal();
-        });
-    } */
-    getStaticInformation("#gender", "calculating__choose-item_active"); 
-    /* Назначаем parentSelector, activeClass */
-    getStaticInformation(".calculating__choose_big", "calculating__choose-item_active"); /* calculating__choose_big обязательно с точкой потому что это селектор */
-
-    function getDynamicInformation(selector) { /*будет принимать в себя тот селектор инпута который нас 
-        интересует */
+    function getDynamicInformation(selector) {
         const input = document.querySelector(selector);
-        /* дальше нам нужно отслеживать что пользоваьель ввел в инпут, например в ваш вес */
-        input.addEventListener("input", () => { /*теперь нам нужно сказать что нужно делать когда пользователь
-            что-то вводит */
-            switch(input.getAttribute("id")){ /* Нам нужно проверить если пользователь кликает в инпут с 
-                id условно рост, то мы записываем данное значение прям в переменную рост */
 
-                /* внутри switch проверяем на строку */
+        input.addEventListener('input', () => {
+
+            if(input.value.match(/\D/g)) {/* Если мы увидим в значение инпута что-то кроме чисел то мы подсказываем пользователю и дальше не даем работать */
+
+                input.style.border = "1px solid red";
+            } else { /* дальше если пользователь исправится  */
+                input.style.border = "none"; //то-есть мы просто убераем красную обводку
+            } /* теперь если я ввожу букву то подсвечивается красным рамка */
+                
+
+            switch(input.getAttribute('id')) {
                 case "height":
-                    height = +input.value; //у input есть какое-то значение
+                    height = +input.value;
                     break;
                 case "weight":
                     weight = +input.value;
@@ -566,18 +559,14 @@ window.addEventListener('DOMContentLoaded', function() {
                 case "age":
                     age = +input.value;
                     break;
-        /* ТЕПЕРЬ КОГДА МЫ ЧТО-ТО БУДЕМ ВВОДИТЬ, ФУНКЦИЯ БУДЕТ ОТТАЛКИВАТЬСЯ ОТ id И ВВОДИТЬ РЕЗУЛЬТАТ
-        ВВОДА В ИНПУТ В ПЕРЕМЕННУЮ */   
             }
+
             calcTotal();
         });
     }
+
     getDynamicInformation('#height');
     getDynamicInformation('#weight');
     getDynamicInformation('#age');
-
-    /*  ПОМНИ ЧТО У НАС ЕСТЬ ФУНКЦИЯ calcTotal КОТОРАЯ ДОЛЖНА ПОСТОЯННО РЕАГИРОВАТЬ НА ТО ЧТО ВВЕЛ ПОЛЬЗОВАТЕЬ
-    УСЛОНО УДАЛИЛ ЛИ ОН ЧТО-ТО ИЗ ВЕСА, ИЛИ ДОБАВИЛ НА В РОСТ НЕ 189 А 190, НЕ ДОПИСАЛ КАКИЕ-ТО ДАННЫЕ,
-     ФУНКЦИЯ ПОСТОЯННО ДОЛЖНО  ПОДСТРАИАВТЬСЯ ПОД ЧТО ОН ВВЕЛ */
 
 });
