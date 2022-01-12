@@ -353,21 +353,11 @@ window.addEventListener('DOMContentLoaded', function() {
         dots.push(dot);
     }
 
-    /*Что бы не было повторение кода нам нужно взять этот .replace(/\D/g, "") который мы везде поставили,
- НУЖНО создать Функцию которая брала бы строку и превращала бы ее в числовой тип данных и избавляла 
- полностью от чисел */
-    function deleteNotDigits (str) {
-        return +str.replace(/\D/g, "");
-    }; /* Эта функция будет принимать строку для модификации (str) */
-
     next.addEventListener('click', () => {
-        /*if (offset == (+width.replace(/\D/g, "") * (slides.length - 1))) {*/
-            if (offset == deleteNotDigits(width) * (slides.length - 1)) {
-                /* вызываем Функцию и во внутрь помещаем Ширине
-                и так нужно сделать везде для неповторения кода */
+        if (offset == (deleteNotDigits(width) * (slides.length - 1))) {
             offset = 0;
         } else {
-            offset += +width.replace(/\D/g, "") 
+            offset += deleteNotDigits(width); 
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
@@ -390,17 +380,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
     prev.addEventListener('click', () => {
         if (offset == 0) {
-           // offset = +width.slice(0, width.length - 2) * (slides.length - 1);
-           offset = deleteNotDigits(width) * (slides.length - 1);
-           /*я хочу сказать что все НЕЧИСЛА которые находятся внутри этой строки я удаляю 
-           ставлю g потому что мне это нужно сделать для всех знаков
-            И ТЕПЕРЬ ВЕЗДЕ ГДЕ БЫЛ .slice(0, width.length - 2) ставим REPLACE
-            
-            +width.replace(/\D/g, "") это меняем на НОВОСОЗДАННУЮ ФУНКЦИЮ deleteNotDigits(width)*/
+            offset = deleteNotDigits(width) * (slides.length - 1);
         } else {
             offset -= deleteNotDigits(width);
         }
-        /*Дословно мы говорили что методом slice мы хотим вырезать то-то, то-то */
 
         slidesField.style.transform = `translateX(-${offset}px)`;
 
@@ -439,5 +422,162 @@ window.addEventListener('DOMContentLoaded', function() {
             dots[slideIndex-1].style.opacity = 1;
         });
     });
- 
-});      
+
+    function deleteNotDigits(str) {
+        return +str.replace(/\D/g, '');
+    }
+
+    // CALCULATOR
+    /* в html добавляем уникальные индфикаторы мужчине и женщине, а именно id male female
+    
+        Дальше к каждому нужному элементу добавляем data-атрибут
+        data-ratio="1.2" Мы каждой активности добавили свой коеифициент с рандомного диетологического сайта
+        */
+
+    const result = document.querySelector(".calculating__result span");
+    /* Я буду получать главный элемент куда я буду все это дело запиывать
+    .calculating__result span - это там где число с вашей суточной нормой каллорий  */
+
+    let sex = "female", height, weight, age, ratio = "1.375"; /* Мы задали значеие женщине и активности
+    потому что на сайте они подефолту горят зеленым и даже если я сразу не укажу пол и активность то
+    они будут стоять по дефолту */
+    /* пол, рост, вес, возраст, коеф активности = то что будет меняться  */
+
+    function calcTotal () {
+        if(!sex || !height|| !weight|| !age|| !ratio) {
+            result.textContent = "____";
+            return;
+        }/* эту функцию мы будем запускать каждый раз когда будет какое-то изменение, если пользователь ввел 
+    какое-то другой элемент или вел что то в инпуте, что бы мы могли нормально пересчитать значение
+    СРАЗУ нужно сделать так что бы эта функия работала только тогда когда пользователь ввел абсолютно все 
+    данные ВАШ ПОЛ, ВАША КОНСТИТУЦИЯ , ФИЗ АКТИВНОСТЬ.
+    Что бы это сделать нужно что бы если хотя бы что-то одно из let sex, height, weight, age, ratio будет 
+    false то функци не работает */
+        if (sex === "female") {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+            /* формула с левого сайта того с диетой  */
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+        }
+        /* Math.round - округляет до ближйшего значения что бы не было условно 2100.41459595959, a 2100 */
+    } 
+    calcTotal ();
+
+    function getStaticInformation (parentSelector, activeClass) {/* теперь нужно оживить наши div где ведите 
+        ваш вес, рост и тд, потому что пока что это просто блоки в которые нельзя ничего ввести */
+ /* parentSelector - мы будем применять нашу функцию getStaticInformation на нескольких элементах по этому 
+ мы поместили parentSelector 
+ И кроме этого мы будем менять класс активности activeClass, наша функция должна знать какой класс переключать
+ по-этому мы помещаем в нее  */
+
+        const elements = document.querySelectorAll(`${parentSelector} div`);
+        /* Я говорю что внутри этого родителя я буду получать все div */
+
+        /* В конце урока Ваня захотел поправить баг что когда мы кликаем чуть мимо дивов 
+        с таблицами(рост, вес, пол, активноть и так далее, то-есть все) то у него ломается верстка
+        Такое происходит потому что мы используем делегирование событий
+        Нужно использовать просто навешивание событий
+        И вместо того что бы вешать на родителя обработчик событий document.querySelector(parentSelector)
+        мы вешаем обработчик событий на каждый элемент*/
+        elements.forEach(elem => {
+            elem.addEventListener("click", (e) => {
+                if(e.target.getAttribute("data-ratio")){
+                    ratio = +e.target.getAttribute("data-ratio");
+            /*Дословно это значит что если пользователь кликнул на умеренная активнось, то мы просто берем 
+            и вытаскиваем эту активность которая у него стоит внутри этого атрибута, а если низкая активность, 
+            то у нас просто переключится значение, но если кликнет в пол то такое не сработает потому что
+            там нет такого атрибута */
+                } else {
+                    sex = e.target.getAttribute("id");
+                }
+                /* если мы работаем с "выберите ваш пол", то мы работает с уникальными id которые мы туда
+            поместили. А если работаем с "ФИЗ АКТИВНОСТЬ" то мы обращаемся к атрибуту data-ratio.
+            ПО-ЭТОМУ мы пишем условие где говорим что если пользователь кликнул на элемент где есть
+            атрибут data-ratio то мы работаем с ним, а если этого атрибута нет то будет работать
+            "ваш пол" по айди */
+    
+                //console.log(ratio, sex); // просто посмотреть на значение переменной
+    
+                /* Теперь необходимо поработать с классами активностей */
+                elements.forEach(elem => { /*говорич что каждый элемент внутри будет избавляться 
+                    от своего аткивного класса */
+                    elem.classList.remove(activeClass);
+                });
+                e.target.classList.add(activeClass) /* Тому Диву на который кликнет пользователь назначается
+                класс Активности ! */
+    
+                calcTotal();
+            });
+        });
+    }
+        /* Это устаревший код, я его вырезал и поместил в elements.forEach(elem => {
+            elem  вместо document.querySelector(parentSelector) */
+
+        /*теперь мы должны отслеживать клики внутри родительского элемента parentSelector  */
+       /* document.querySelector(parentSelector).addEventListener("click", (e) => {
+            if(e.target.getAttribute("data-ratio")){
+                ratio = +e.target.getAttribute("data-ratio");
+        /*Дословно это значит что если пользователь кликнул на умеренная активнось, то мы просто берем 
+        и вытаскиваем эту активность которая у него стоит внутри этого атрибута, а если низкая активность, 
+        то у нас просто переключится значение, но если кликнет в пол то такое не сработает потому что
+        там нет такого атрибута */
+           /* } else {
+                sex = e.target.getAttribute("id");
+            }
+            /* если мы работаем с "выберите ваш пол", то мы работает с уникальными id которые мы туда
+        поместили. А если работаем с "ФИЗ АКТИВНОСТЬ" то мы обращаемся к атрибуту data-ratio.
+        ПО-ЭТОМУ мы пишем условие где говорим что если пользователь кликнул на элемент где есть
+        атрибут data-ratio то мы работаем с ним, а если этого атрибута нет то будет работать
+        "ваш пол" по айди */
+
+            //console.log(ratio, sex); // просто посмотреть на значение переменной
+
+            /* Теперь необходимо поработать с классами активностей */
+            /*elements.forEach(elem => { /*говорич что каждый элемент внутри будет избавляться 
+                от своего аткивного класса */
+           /*     elem.classList.remove(activeClass);
+            });
+            e.target.classList.add(activeClass) /* Тому Диву на который кликнет пользователь назначается
+            класс Активности ! */
+
+          /*  calcTotal();
+        });
+    } */
+    getStaticInformation("#gender", "calculating__choose-item_active"); 
+    /* Назначаем parentSelector, activeClass */
+    getStaticInformation(".calculating__choose_big", "calculating__choose-item_active"); /* calculating__choose_big обязательно с точкой потому что это селектор */
+
+    function getDynamicInformation(selector) { /*будет принимать в себя тот селектор инпута который нас 
+        интересует */
+        const input = document.querySelector(selector);
+        /* дальше нам нужно отслеживать что пользоваьель ввел в инпут, например в ваш вес */
+        input.addEventListener("input", () => { /*теперь нам нужно сказать что нужно делать когда пользователь
+            что-то вводит */
+            switch(input.getAttribute("id")){ /* Нам нужно проверить если пользователь кликает в инпут с 
+                id условно рост, то мы записываем данное значение прям в переменную рост */
+
+                /* внутри switch проверяем на строку */
+                case "height":
+                    height = +input.value; //у input есть какое-то значение
+                    break;
+                case "weight":
+                    weight = +input.value;
+                    break;
+                case "age":
+                    age = +input.value;
+                    break;
+        /* ТЕПЕРЬ КОГДА МЫ ЧТО-ТО БУДЕМ ВВОДИТЬ, ФУНКЦИЯ БУДЕТ ОТТАЛКИВАТЬСЯ ОТ id И ВВОДИТЬ РЕЗУЛЬТАТ
+        ВВОДА В ИНПУТ В ПЕРЕМЕННУЮ */   
+            }
+            calcTotal();
+        });
+    }
+    getDynamicInformation('#height');
+    getDynamicInformation('#weight');
+    getDynamicInformation('#age');
+
+    /*  ПОМНИ ЧТО У НАС ЕСТЬ ФУНКЦИЯ calcTotal КОТОРАЯ ДОЛЖНА ПОСТОЯННО РЕАГИРОВАТЬ НА ТО ЧТО ВВЕЛ ПОЛЬЗОВАТЕЬ
+    УСЛОНО УДАЛИЛ ЛИ ОН ЧТО-ТО ИЗ ВЕСА, ИЛИ ДОБАВИЛ НА В РОСТ НЕ 189 А 190, НЕ ДОПИСАЛ КАКИЕ-ТО ДАННЫЕ,
+     ФУНКЦИЯ ПОСТОЯННО ДОЛЖНО  ПОДСТРАИАВТЬСЯ ПОД ЧТО ОН ВВЕЛ */
+
+});
