@@ -282,15 +282,14 @@ window.addEventListener('DOMContentLoaded', function() {
     let slideIndex = 1;
 
     const slides = document.querySelectorAll('.offer__slide'),
+        slider = document.querySelector('.offer__slider'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         total = document.querySelector('#total'),
         current = document.querySelector('#current'),
         slidesWrapper = document.querySelector('.offer__slider-wrapper'),
         width = window.getComputedStyle(slidesWrapper).width,
-        slidesField = document.querySelector('.offer__slider-inner'),
-        slider = document.querySelector(".offer__slider"); /*нам нужно будет к нему обратиться что
-        бы установить position relative */
+        slidesField = document.querySelector('.offer__slider-inner');
 
     if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
@@ -310,15 +309,11 @@ window.addEventListener('DOMContentLoaded', function() {
         slide.style.width = width;
     });
 
-    slider.style.position = "relative"; /* теперь все элементы что будут абсолютно спозиционированы внутри 
-    слайдера будут нормально отображаться*/
+    slider.style.position = 'relative';
 
-    /*следующая наша задача создать большую обертку для всех точек */
-    const indicators = document.createElement("ol");
-
-        dots = []; // создаем массив дотс что бы можно было ее запушить
-
-    indicators.classList.add("carousel-indicators");
+    const indicators = document.createElement('ol'),
+          dots = [];
+    indicators.classList.add('carousel-indicators');
     indicators.style.cssText = `
         position: absolute;
         right: 0;
@@ -330,53 +325,49 @@ window.addEventListener('DOMContentLoaded', function() {
         margin-right: 15%;
         margin-left: 15%;
         list-style: none;
-    `; //всё, стили будут применины к этому блоку. 
-
-    //Теперь нужно поместить нашу обертку прям во внутрь слайдера
-
+    `; // Если хотите - добавьте в стили, но иногда у нас нет доступа к стилям
     slider.append(indicators);
 
-    // Пока что наш блок ничего не содержит это просто ordered list (ol) в который мы должны что-то поместить
-    //Для этого мы должны основываясь на кстве слайдов создать нужное кство точек
-
-    for (let i = 0; i < slides.length; i++) {//наш цикл закончится только когда закончится кство слайдов
-        const dot = document.createElement("li"); //создаем точки
-        dot.setAttribute("data-slide-to", i + 1); //нужно установить атрибут который будет четко говорить 1 точка идет к 1 слайду
-/*("data-slide-to", i + 1) - дословно это значит что я каждой точки устанавливать буду атрибут data-slide-to,
-то-есть к какому слайду она будет относится 
-    i + 1 - и буду устанавливать нумерацию с 1, потому что 1 слайд - 1 точка*/
-    dot.style.cssText = `
-    box-sizing: content-box;
-    flex: 0 1 auto;
-    width: 30px;
-    height: 6px;
-    margin-right: 3px;
-    margin-left: 3px;
-    cursor: pointer;
-    background-color: #fff;
-    background-clip: padding-box;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    opacity: .5;
-    transition: opacity .6s ease;
-    `;
-
-        if(i == 0){
+    for (let i = 0; i < slides.length; i++) {
+        const dot = document.createElement('li');
+        dot.setAttribute('data-slide-to', i + 1);
+        dot.style.cssText = `
+            box-sizing: content-box;
+            flex: 0 1 auto;
+            width: 30px;
+            height: 6px;
+            margin-right: 3px;
+            margin-left: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            background-clip: padding-box;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            opacity: .5;
+            transition: opacity .6s ease;
+        `;
+        if (i == 0) {
             dot.style.opacity = 1;
-        } /* слайдер начинается чаще всего с 0 индекса, то 1 точка будет активна, он просто визуально будет
-        более ярким */
-
-    indicators.append(dot); // эту точку мы запендили в индикаторс
-    dots.push(dot); /* создав массив, мы получили метод пуш, то-есть мы создали массив дотсы и когда
-    мы заапендили точку на страничку мы ее и запушили и теперь у нас получился массив который мы сможем
-    использовать */
+        }
+        indicators.append(dot);
+        dots.push(dot);
     }
 
+    /*Что бы не было повторение кода нам нужно взять этот .replace(/\D/g, "") который мы везде поставили,
+ НУЖНО создать Функцию которая брала бы строку и превращала бы ее в числовой тип данных и избавляла 
+ полностью от чисел */
+    function deleteNotDigits (str) {
+        return +str.replace(/\D/g, "");
+    }; /* Эта функция будет принимать строку для модификации (str) */
+
     next.addEventListener('click', () => {
-        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) {
+        /*if (offset == (+width.replace(/\D/g, "") * (slides.length - 1))) {*/
+            if (offset == deleteNotDigits(width) * (slides.length - 1)) {
+                /* вызываем Функцию и во внутрь помещаем Ширине
+                и так нужно сделать везде для неповторения кода */
             offset = 0;
         } else {
-            offset += +width.slice(0, width.length - 2); 
+            offset += +width.replace(/\D/g, "") 
         }
 
         slidesField.style.transform = `translateX(-${offset}px)`;
@@ -393,17 +384,23 @@ window.addEventListener('DOMContentLoaded', function() {
             current.textContent =  slideIndex;
         }
 
-        dots.forEach(dot => dot.style.opacity = ".5");/*опасити 50 процентом это значит что пока одна 
-        будет яркая остальные будут яркие на половину, то-есть все точки будут равны 50 процентов */
-        dots[slideIndex - 1].style.opacity = 1;
+        dots.forEach(dot => dot.style.opacity = ".5");
+        dots[slideIndex-1].style.opacity = 1;
     });
 
     prev.addEventListener('click', () => {
         if (offset == 0) {
-            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+           // offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+           offset = deleteNotDigits(width) * (slides.length - 1);
+           /*я хочу сказать что все НЕЧИСЛА которые находятся внутри этой строки я удаляю 
+           ставлю g потому что мне это нужно сделать для всех знаков
+            И ТЕПЕРЬ ВЕЗДЕ ГДЕ БЫЛ .slice(0, width.length - 2) ставим REPLACE
+            
+            +width.replace(/\D/g, "") это меняем на НОВОСОЗДАННУЮ ФУНКЦИЮ deleteNotDigits(width)*/
         } else {
-            offset -= +width.slice(0, width.length - 2);
+            offset -= deleteNotDigits(width);
         }
+        /*Дословно мы говорили что методом slice мы хотим вырезать то-то, то-то */
 
         slidesField.style.transform = `translateX(-${offset}px)`;
 
@@ -420,33 +417,27 @@ window.addEventListener('DOMContentLoaded', function() {
         }
 
         dots.forEach(dot => dot.style.opacity = ".5");
-        dots[slideIndex - 1].style.opacity = 1;
+        dots[slideIndex-1].style.opacity = 1;
     });
-    /* осталось добавить к ним функциональности, то-есть когда я буду кликать на эту точку меня
-        перебрасывало на определенный слайд. И что бы это сделать нужно что бы и вверу номер менялся
-        и слайдер. и все дивы друг за другом перестраивались*/
 
-        dots.forEach(dot => {
-            dot.addEventListener("click", (e) =>{
-                const slideTo = e.target.getAttribute("data-slide-to");
-                /* мы будем использовать обработичк событий e потому что у каждой из точек есть атрибут
-        дейта слайд ту который мы и должны получить потому что мы на него ориентируемся */
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const slideTo = e.target.getAttribute('data-slide-to');
 
-                slideIndex = slideTo; /* кликнули на 4 точку, у нас тут стоит 4ка и соотвественно слайд
-                индекс пойдет на 4ку */
-                offset = +width.slice(0, width.length - 2) * (slideTo- 1); /* обрати внимание что 
-                вместо slides.length мы поместили slideTo */
-                slidesField.style.transform = `translateX(-${offset}px)`;
+            slideIndex = slideTo;
+            offset = deleteNotDigits(width) * (slideTo - 1);
 
-                if (slides.length < 10) {
-                    current.textContent =  `0${slideIndex}`;
-                } else {
-                    current.textContent =  slideIndex;
-                }
+            slidesField.style.transform = `translateX(-${offset}px)`;
 
-                dots.forEach(dot => dot.style.opacity = ".5");
-                dots[slideIndex - 1].style.opacity = 1;
-            });
-        }); 
+            if (slides.length < 10) {
+                current.textContent =  `0${slideIndex}`;
+            } else {
+                current.textContent =  slideIndex;
+            }
 
-});
+            dots.forEach(dot => dot.style.opacity = ".5");
+            dots[slideIndex-1].style.opacity = 1;
+        });
+    });
+ 
+});      
