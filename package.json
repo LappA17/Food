@@ -17,9 +17,20 @@
   },
   "homepage": "https://github.com/LappA17/food#readme",
   "dependencies": {
-    "json-server": "^0.17.0"
+    "@babel/polyfill": "^7.12.1",
+    "es6-promise": "^4.2.8",
+    "json-server": "^0.17.0",
+    "nodelist-foreach-polyfill": "^1.2.0"
   },
+  "browserslist": [
+    "> 1%"
+  ],
   "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.8",
+    "babel-loader": "^8.2.3",
+    "core-js": "^3.20.2",
     "webpack": "^5.66.0",
     "webpack-cli": "^4.9.1"
   }
