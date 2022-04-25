@@ -1,18 +1,23 @@
 function timer(id, deadline) {
-    /*а второй аргумент будет deadline */
-    // Timer
 
-    /* const deadline = '2022-06-11'; это больше не нужно, потому что наш аршгумент deadline будет передаваться
-    в функцию setClock, которая и настривает наши часы
-    
-    И УЖЕ В ТАЙМЕРЕ ЗАДАЕМ НУЖНЫЕ НАМ СЕЛЕКТОРЫ И ДАТУ */
-
+    //const deadline = '2022-02-11' Если мы поставим прошедшую дату то таймер сломается и будут на сайте отрицательные значения
+    const deadline = '2022-02-11'
     function getTimeRemaining(endtime) {
-        const t = Date.parse(endtime) - Date.parse(new Date()),
+        let days, hours, minutes, seconds
+        const t = Date.parse(endtime) - Date.parse(new Date());
+
+        //Если меньше 0 то всё ставим в 0
+        if (t <= 0) {
+            days = 0
+            hours = 0
+            minutes = 0
+            seconds = 0
+        } else { // если все в порядке то норм работает
             days = Math.floor( (t/(1000*60*60*24)) ),
             seconds = Math.floor( (t/1000) % 60 ),
             minutes = Math.floor( (t/1000/60) % 60 ),
             hours = Math.floor( (t/(1000*60*60) % 24) );
+        }
 
         return {
             'total': t,
@@ -57,8 +62,6 @@ function timer(id, deadline) {
     }
 
     setClock(id, deadline);
-    /* вместо таймера setClock('.timer', deadline); добавляем аргумент id и прописываем его сразу в 
-    функцию timer */
 }
 
 export default timer;

@@ -4,7 +4,7 @@
 И смотри, теперь так как мы используем диструктуризацию, мы можем в объекте slider в глобальном джаваскрипте просто в любом порядке записывать 
 */
 function slider({container, slide, nextArrow, prevArrow, totalCounter, currentCounter, wrapper, field }) {
-    // Slider
+    // Slider.
 
     let offset = 0;
     let slideIndex = 1;
